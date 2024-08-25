@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, NavigateFunction } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { cars, Car } from "../carData"; // Make sure this path is correct
 
 const CarAffordabilityCalculator = () => {
-  const { carId } = useParams<{ carId: string }>();
-  const navigate = useNavigate(); // Add this line
+  const { carId, name, price } = useParams<{
+    carId: string;
+    name: string;
+    price: string;
+  }>();
+  const navigate = useNavigate();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [downPayment, setDownPayment] = useState<number | null>(null);
   const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
@@ -13,7 +17,13 @@ const CarAffordabilityCalculator = () => {
   >(null);
 
   useEffect(() => {
-    const car = cars.find((c) => c.id.toString() === carId);
+    let car: Car | undefined;
+    if (carId) {
+      car = cars.find((c) => c.id.toString() === carId);
+    } else if (name && price) {
+      car = { id: "custom", name, price: Number(price) };
+    }
+
     if (car) {
       setSelectedCar(car);
       const calculatedDownPayment = car.price * 0.2; // 20% of the car price
@@ -24,9 +34,14 @@ const CarAffordabilityCalculator = () => {
       const calculatedYearlySalary = (calculatedMonthlyPayment / 0.1) * 12;
       setRequiredYearlySalary(calculatedYearlySalary);
     }
-  }, [carId]);
+  }, [carId, name, price]);
 
-  if (!selectedCar || downPayment === null) {
+  if (
+    !selectedCar ||
+    downPayment === null ||
+    monthlyPayment === null ||
+    requiredYearlySalary === null
+  ) {
     return <div>Loading...</div>;
   }
 
@@ -44,15 +59,26 @@ const CarAffordabilityCalculator = () => {
       </button>
       <h1 className="text-3xl font-bold mb-4">Car Affordability Calculator</h1>
       <h2 className="text-2xl mb-4">Selected Car: {selectedCar.name}</h2>
-      <p className="text-xl">
+      <p className="text-xl mb-2">
+        Car Price: ${selectedCar.price.toLocaleString()}
+      </p>
+      <p className="text-xl mb-2">
         20% Down Payment Needed: ${downPayment.toLocaleString()}
       </p>
-      <p className="text-xl">
-        Monthly Payment Needed: ${monthlyPayment?.toLocaleString()}
+      <p className="text-xl mb-2">
+        Monthly Payment Needed: $
+        {monthlyPayment.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
       </p>
-      <p className="text-xl">Financing Term: 48 Months</p>
-      <p className="text-xl">
-        Yearly Salary Needed: ${requiredYearlySalary?.toLocaleString()}
+      <p className="text-xl mb-2">Financing Term: 48 Months</p>
+      <p className="text-xl mb-2">
+        Yearly Salary Needed: $
+        {requiredYearlySalary.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
       </p>
     </div>
   );
