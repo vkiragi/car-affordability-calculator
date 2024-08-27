@@ -11,7 +11,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
-            path="/calculator/:carId"
+            path="/calculator/:make/:model/:price"
             element={<CarAffordabilityCalculator />}
           />
         </Routes>

@@ -3,9 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { cars, Car } from "../carData"; // Make sure this path is correct
 
 const CarAffordabilityCalculator = () => {
-  const { carId, name, price } = useParams<{
-    carId: string;
-    name: string;
+  const { make, model, price } = useParams<{
+    make: string;
+    model: string;
     price: string;
   }>();
   const navigate = useNavigate();
@@ -17,29 +17,36 @@ const CarAffordabilityCalculator = () => {
   >(null);
 
   useEffect(() => {
-    let car: Car | undefined;
-    const carIdNumber = parseInt(carId as string, 10);
+    if (make && model && price) {
+      const parsedPrice = parseFloat(price);
 
-    if (!isNaN(carIdNumber) && carIdNumber <= cars.length) {
-      // This is a predefined car
-      car = cars.find((c) => c.id === carIdNumber);
-    } else if (name && price) {
-    }
+      // Find the car based on make, model, and price
+      const car = cars.find(
+        (c) => c.make === make && c.model === model && c.price === parsedPrice
+      );
 
-    if (car) {
-      setSelectedCar(car);
-      const calculatedDownPayment = car.price * 0.2; // 20% of the car price
-      setDownPayment(calculatedDownPayment);
-      const loanAmount = car.price - calculatedDownPayment;
-      const calculatedMonthlyPayment = loanAmount / 48; // 48 months (4 years)
-      setMonthlyPayment(calculatedMonthlyPayment);
-      const calculatedYearlySalary = (calculatedMonthlyPayment / 0.1) * 12;
-      setRequiredYearlySalary(calculatedYearlySalary);
+      if (car) {
+        setSelectedCar(car);
+
+        // Calculate down payment, monthly payment, and required yearly salary
+        const calculatedDownPayment = car.price * 0.2; // 20% of the car price
+        setDownPayment(calculatedDownPayment);
+
+        const loanAmount = car.price - calculatedDownPayment;
+        const calculatedMonthlyPayment = loanAmount / 48; // 48 months (4 years)
+        setMonthlyPayment(calculatedMonthlyPayment);
+
+        const calculatedYearlySalary = (calculatedMonthlyPayment / 0.1) * 12;
+        setRequiredYearlySalary(calculatedYearlySalary);
+      } else {
+        // If car not found, navigate back to the home page
+        navigate("/");
+      }
     } else {
-      // Handle case where car is not found
+      // If any of the parameters are missing, navigate back to the home page
       navigate("/");
     }
-  }, [carId, name, price, navigate]);
+  }, [make, model, price, navigate]);
 
   if (
     !selectedCar ||
@@ -63,7 +70,9 @@ const CarAffordabilityCalculator = () => {
         Back to Home
       </button>
       <h1 className="text-3xl font-bold mb-4">Car Affordability Calculator</h1>
-      <h2 className="text-2xl mb-4">Selected Car: {selectedCar.name}</h2>
+      <h2 className="text-2xl mb-4">
+        Selected Car: {selectedCar.make} {selectedCar.model}
+      </h2>
       <p className="text-xl mb-2">
         Car Price: ${selectedCar.price.toLocaleString()}
       </p>

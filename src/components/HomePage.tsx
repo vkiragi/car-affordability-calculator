@@ -3,11 +3,23 @@ import { Link } from "react-router-dom";
 import { cars } from "../carData";
 
 const HomePage: React.FC = () => {
-  const [selectedCar, setSelectedCar] = useState("");
+  const [selectedMake, setSelectedMake] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
 
-  const handleCarChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCar(event.target.value);
+  // Get unique car makes
+  const uniqueMakes = Array.from(new Set(cars.map((car) => car.make)));
+
+  const handleMakeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMake(event.target.value);
+    setSelectedModel(""); // Reset model selection when make changes
   };
+
+  const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedModel(event.target.value);
+  };
+
+  // Filter cars based on selected make
+  const filteredCars = cars.filter((car) => car.make === selectedMake);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center text-white p-4 overflow-hidden">
@@ -19,31 +31,51 @@ const HomePage: React.FC = () => {
           Find out how much car you can afford based on the 20/10/4 rule
         </p>
 
+        {/* Dropdown for Car Make */}
         <select
-          value={selectedCar}
-          onChange={handleCarChange}
+          value={selectedMake}
+          onChange={handleMakeChange}
           className="w-full bg-white text-blue-600 px-4 py-2 rounded-md font-semibold"
         >
-          <option value="">Select a car</option>
-          {cars.map((car) => (
-            <option key={car.id} value={car.id.toString()}>
-              {car.name} - ${car.price.toLocaleString()}
+          <option value="">Select a car make</option>
+          {uniqueMakes.map((make) => (
+            <option key={make} value={make}>
+              {make}
             </option>
           ))}
         </select>
 
-        <div className="flex justify-center">
-          <Link
-            to={selectedCar ? `/calculator/${selectedCar}` : "#"}
-            className={`bg-white text-blue-600 px-6 py-3 rounded-full font-semibold transition duration-300 ${
-              selectedCar
-                ? "hover:bg-blue-100"
-                : "opacity-50 cursor-not-allowed"
-            }`}
-            onClick={(e) => !selectedCar && e.preventDefault()}
+        {/* Dropdown for Car Models */}
+        {selectedMake && (
+          <select
+            value={selectedModel}
+            onChange={handleModelChange}
+            className="w-full bg-white text-blue-600 px-4 py-2 rounded-md font-semibold mt-4"
           >
-            Calculate Affordability
-          </Link>
+            <option value="">Select a car model</option>
+            {filteredCars.map((car) => (
+              <option key={car.model} value={car.model}>
+                {car.model} - ${car.price.toLocaleString()}
+              </option>
+            ))}
+          </select>
+        )}
+
+        <div className="flex justify-center mt-4">
+          {selectedModel && (
+            <Link
+              to={`/calculator/${encodeURIComponent(
+                selectedMake
+              )}/${encodeURIComponent(selectedModel)}/${
+                filteredCars
+                  .find((car) => car.model === selectedModel)
+                  ?.price.toString() ?? ""
+              }`}
+              className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold transition duration-300 hover:bg-blue-100 cursor-pointer"
+            >
+              Calculate Affordability
+            </Link>
+          )}
         </div>
       </div>
     </div>
