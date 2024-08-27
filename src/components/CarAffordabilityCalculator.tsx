@@ -18,10 +18,12 @@ const CarAffordabilityCalculator = () => {
 
   useEffect(() => {
     let car: Car | undefined;
-    if (carId) {
-      car = cars.find((c) => c.id.toString() === carId);
+    const carIdNumber = parseInt(carId as string, 10);
+
+    if (!isNaN(carIdNumber) && carIdNumber <= cars.length) {
+      // This is a predefined car
+      car = cars.find((c) => c.id === carIdNumber);
     } else if (name && price) {
-      car = { id: "custom", name, price: Number(price) };
     }
 
     if (car) {
@@ -33,8 +35,11 @@ const CarAffordabilityCalculator = () => {
       setMonthlyPayment(calculatedMonthlyPayment);
       const calculatedYearlySalary = (calculatedMonthlyPayment / 0.1) * 12;
       setRequiredYearlySalary(calculatedYearlySalary);
+    } else {
+      // Handle case where car is not found
+      navigate("/");
     }
-  }, [carId, name, price]);
+  }, [carId, name, price, navigate]);
 
   if (
     !selectedCar ||
