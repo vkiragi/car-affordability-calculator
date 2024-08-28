@@ -63,12 +63,6 @@ const CarAffordabilityCalculator = () => {
 
   return (
     <div className="p-8">
-      <button
-        onClick={handleGoHome}
-        className="absolute top-4 left-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Back to Home
-      </button>
       <h1 className="text-3xl font-bold mb-4">Car Affordability Calculator</h1>
       <h2 className="text-2xl mb-4">
         Selected Car: {selectedCar.make} {selectedCar.model}
@@ -94,6 +88,12 @@ const CarAffordabilityCalculator = () => {
           maximumFractionDigits: 2,
         })}
       </p>
+      <button
+        onClick={handleGoHome}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Back to Home
+      </button>
     </div>
   );
 };

@@ -3,11 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import "./App.css";
 import CarAffordabilityCalculator from "./components/CarAffordabilityCalculator";
+import VideoBackground from "./components/VideoBackground";
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <VideoBackground />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
