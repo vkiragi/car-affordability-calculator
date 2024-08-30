@@ -8,6 +8,7 @@ const CarAffordabilityCalculator = () => {
     model: string;
     price: string;
   }>();
+
   const navigate = useNavigate();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [downPayment, setDownPayment] = useState<number | null>(null);
@@ -15,12 +16,32 @@ const CarAffordabilityCalculator = () => {
   const [requiredYearlySalary, setRequiredYearlySalary] = useState<
     number | null
   >(null);
+  const [creditScore, setCreditScore] = useState<number>(700);
+
+  const getInterestRate = (creditScore: number) => {
+    if (creditScore >= 750) return 0.03; // 3% for excellent credit
+    if (creditScore >= 700) return 0.05; // 5% for good credit
+    if (creditScore >= 650) return 0.07; // 7% for fair credit
+    if (creditScore >= 600) return 0.09; // 9% for poor credit
+    return 0.11; // 11% for very poor credit
+  };
+
+  const calculateMonthlyPayment = (
+    principal: number,
+    interestRate: number,
+    termInMonths: number
+  ): number => {
+    const monthlyRate = interestRate / 12;
+    return (
+      (principal * monthlyRate * Math.pow(1 + monthlyRate, termInMonths)) /
+      (Math.pow(1 + monthlyRate, termInMonths) - 1)
+    );
+  };
 
   useEffect(() => {
     if (make && model && price) {
       const parsedPrice = parseFloat(price);
 
-      // Find the car based on make, model, and price
       const car = cars.find(
         (c) => c.make === make && c.model === model && c.price === parsedPrice
       );
@@ -33,20 +54,23 @@ const CarAffordabilityCalculator = () => {
         setDownPayment(calculatedDownPayment);
 
         const loanAmount = car.price - calculatedDownPayment;
-        const calculatedMonthlyPayment = loanAmount / 48; // 48 months (4 years)
+        const interestRate = getInterestRate(creditScore);
+        const termInMonths = 48;
+        const calculatedMonthlyPayment = calculateMonthlyPayment(
+          loanAmount,
+          interestRate,
+          termInMonths
+        );
         setMonthlyPayment(calculatedMonthlyPayment);
-
         const calculatedYearlySalary = (calculatedMonthlyPayment / 0.1) * 12;
         setRequiredYearlySalary(calculatedYearlySalary);
       } else {
-        // If car not found, navigate back to the home page
         navigate("/");
       }
     } else {
-      // If any of the parameters are missing, navigate back to the home page
       navigate("/");
     }
-  }, [make, model, price, navigate]);
+  }, [make, model, price, navigate, creditScore]);
 
   if (
     !selectedCar ||
@@ -54,6 +78,10 @@ const CarAffordabilityCalculator = () => {
     monthlyPayment === null ||
     requiredYearlySalary === null
   ) {
+    // console.log(selectedCar);
+    // console.log(downPayment);
+    console.log(monthlyPayment);
+    // console.log(requiredYearlySalary);
     return <div>Loading...</div>;
   }
 
@@ -88,9 +116,29 @@ const CarAffordabilityCalculator = () => {
           maximumFractionDigits: 2,
         })}
       </p>
+      <div className="mb-4">
+        <label htmlFor="creditScore" className="block text-xl mb-2">
+          Enter Your Credit Score:
+        </label>
+        <input
+          type="number"
+          id="creditScore"
+          placeholder="700"
+          value={creditScore}
+          onChange={(e) => {
+            const score = Number(e.target.value);
+            if (score >= 300 && score <= 850) {
+              setCreditScore(score);
+            }
+          }}
+          className="w-full p-2 border rounded-md text-xl"
+          min="300"
+          max="850"
+        />
+      </div>
       <button
         onClick={handleGoHome}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
       >
         Back to Home
       </button>
