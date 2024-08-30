@@ -1,13 +1,36 @@
 import React, { useEffect, useRef } from "react";
-import backgroundVideo from "../assets/car-background-video.mp4";
+import backgroundVideo from "../assets/background-video.mp4";
+
 const VideoBackground: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = 0.5; // This sets the playback speed to half the normal speed
+    const video = videoRef.current;
+    if (video) {
+      const setSlowPlaybackRate = () => {
+        video.playbackRate = 0.5; // 10% of normal speed
+      };
+
+      // Set initial playback rate
+      setSlowPlaybackRate();
+
+      // Ensure playback rate is maintained
+      video.addEventListener("ratechange", setSlowPlaybackRate);
+
+      // Optional: log when playback rate changes
+      const logRateChange = () => {
+        console.log("Playback rate changed to:", video.playbackRate);
+      };
+      video.addEventListener("ratechange", logRateChange);
+
+      // Cleanup function
+      return () => {
+        video.removeEventListener("ratechange", setSlowPlaybackRate);
+        video.removeEventListener("ratechange", logRateChange);
+      };
     }
   }, []);
+
   return (
     <div
       style={{
@@ -23,9 +46,11 @@ const VideoBackground: React.FC = () => {
       }}
     >
       <video
+        ref={videoRef}
         autoPlay
         loop
         muted
+        playsInline
         style={{
           position: "absolute",
           top: "50%",

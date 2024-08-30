@@ -26,6 +26,14 @@ const CarAffordabilityCalculator = () => {
     return 0.11; // 11% for very poor credit
   };
 
+  const handleCreditScore = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty input or numbers
+    if (value === "" || /^\d+$/.test(value)) {
+      setCreditScore(value === "" ? 0 : parseInt(value, 10));
+    }
+  };
+
   const calculateMonthlyPayment = (
     principal: number,
     interestRate: number,
@@ -90,7 +98,7 @@ const CarAffordabilityCalculator = () => {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-slate-500 bg-opacity-70 rounded-xl">
       <h1 className="text-3xl font-bold mb-4">Car Affordability Calculator</h1>
       <h2 className="text-2xl mb-4">
         Selected Car: {selectedCar.make} {selectedCar.model}
@@ -121,19 +129,12 @@ const CarAffordabilityCalculator = () => {
           Enter Your Credit Score:
         </label>
         <input
-          type="number"
+          type="text"
           id="creditScore"
           placeholder="700"
           value={creditScore}
-          onChange={(e) => {
-            const score = Number(e.target.value);
-            if (score >= 300 && score <= 850) {
-              setCreditScore(score);
-            }
-          }}
+          onChange={handleCreditScore}
           className="w-full p-2 border rounded-md text-xl"
-          min="300"
-          max="850"
         />
       </div>
       <button
